@@ -1,0 +1,1 @@
+#define SYNTAX_ERROR "SYNTAX_ERROR"
