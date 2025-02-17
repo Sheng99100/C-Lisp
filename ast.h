@@ -1,15 +1,34 @@
-#define NUMBER      0
-#define STRING      1
-#define SYMBOL      2
-#define COMPOSED    3
+#ifndef AST_H
+#define AST_H
+#define VALUE        0
+#define VARIABLE     1
+#define NUMBER       2
+#define STRING       3
+#define SYMBOL       4
+#define COMPOSED     5
+#define UNDEFINED    6
+#define PROCEDURE    7
 
-typedef struct pair{
+typedef struct proc proc;
+typedef struct token token;
+typedef struct pair pair;
+
+typedef struct lisp_value {
     int num;
-    char * str;
+    char *str;
+    proc *proc;
+    char type;
+} lisp_value;
+
+typedef struct token {
     char * var;
-    struct pair * composed_exp;
+    lisp_value * value;
+    pair * composed_exp;
+    char type;
+} token;
 
+typedef struct pair {
+    struct token * token;
     struct pair * next;
-
-    int type;
 } pair;
+#endif
