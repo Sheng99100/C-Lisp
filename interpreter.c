@@ -42,7 +42,16 @@ lambda * make_lambda(pair * define_exp) {
 }
 
 void eval_define(pair * define_exp, env * env) {
-    token *var = cadr(define_exp);
+    if(define_exp->next == 0) {
+        printf("[eval_define]: define nead a variable\n");
+        return;
+    }
+    if(define_exp->next->next == 0) {
+        printf("[eval_define]: define nead a value\n");
+        return;
+    }
+    token * var = cadr(define_exp);
+    
     if(var->type == VARIABLE) {
         token * val_token = define_exp->next->next->token;
         
@@ -52,11 +61,13 @@ void eval_define(pair * define_exp, env * env) {
         }else if(val_token->type == VARIABLE) {
             val = look_up_var(val_token->var, env);
             if(val == 0) {
+                printf("[eval_define]: variable %s is undefined\n", val_token->var);
                 return;
             }
         }else if(val_token->type == COMPOSED) {
             val = eval(val_token->composed_exp, env);
             if (val == 0) {
+                printf("[eval_define]: eval exception\n");
                 return;
             }
         }
@@ -80,7 +91,7 @@ void eval_define(pair * define_exp, env * env) {
             set_var(sign->token->var, new_val, env);
         }
     }else {
-        printf("The variable part of define cannot be a value\n");
+        printf("[eval_define]: The variable part of define cannot be a value\n");
     }
 }
 
@@ -369,7 +380,7 @@ lisp_value * eval(pair * exp, env * env) {
     return res_val;
 }
 
-void * interpret(char * exp) {
+void interpret(char * exp) {
     char type = judge_type(exp);
     if (type == STRING || type == NUMBER) { // 判断表达式类型
         printf(exp);
@@ -381,7 +392,11 @@ void * interpret(char * exp) {
             printf("variable %s is undefined\n", exp);
         }
     }else if(type == COMPOSED) {
-        pair * parsed_exp = parse(exp);
+        pair * parsed_exp = parse(exp); 
+        if(parsed_exp == 0) {
+            printf("[interpret]: parse exception\n");
+            return;
+        }
         lisp_value * res  = eval(parsed_exp, global_env);
         if(res != 0) {
             show_lisp_value(res);
@@ -391,21 +406,34 @@ void * interpret(char * exp) {
 
 void main(int argc, char const *argv[]) {
     init_global_env();
-    char exp[1024];
+    char buffer[1024];
 
     while (1){
         for (size_t i = 0; i < 1024; i++) {
-            exp[i] = 0;
+            buffer[i] = 0;
         }
-        fgets(exp, sizeof(exp), stdin);
+
+        printf("c-lisp>");
+
+        fgets(buffer, sizeof(buffer), stdin);
+
+        // 将第一个非空白字符的位置作为表达式起始地址
+        char * exp = buffer;
+        while (*exp == ' ') {
+            exp++;
+        }
+
+        // fgets 会将换行符也读入，这里去掉换行符
         size_t len = strlen(exp);
         if (len > 0 && exp[len - 1] == '\n') {
             exp[len - 1] = '\0';
         }
-        if (strcmp(exp, "exit\n") == 0){
+
+        if (strcmp(exp, "exit") == 0) {
             printf("bye\n");
             exit(0);
         }
+
         interpret(exp);
     }
 }

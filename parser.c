@@ -57,22 +57,23 @@ pair * parse(char * exp) {
     pair * cur_exp    = parsed_exp;
     pair * pre_exp    = 0;
 
-    int i = 0;
-    int token_start_index = 0;
-    int end_i = 0;
-    int l_parenthesis = 0;
-    char in_str = 0;
+    int i = 0; // 当前字符索引
+    int token_start_index = 0; // 当前 token 起始索引
+    int end_i = 0; // 当前 token 结束索引
+    int l_parenthesis = 0; // 当前括号层次
+    char in_str = 0; // 当前token是否是字符串
 
+    // 去除开头空格
     while (exp[i] == ' ')
         i++;
-    if (exp[i] != '(') {
-        puts("[parse]: not a application\n");
+    if (exp[i] != '('){
+        printf("[parse]: %s not a application\n", exp);
     }else {
         i++;
         l_parenthesis++;
     }
-    
-    while (exp[i] != 0 && l_parenthesis >= 1) {
+
+    while (exp[i] != 0 && exp[i] != '\n' && l_parenthesis >= 1) {
         if (l_parenthesis > 1) {
             if (exp[i] == '"' || exp[i] == '\'') {
                 in_str = !in_str;
@@ -134,7 +135,7 @@ pair * parse(char * exp) {
                         cur_exp->token->type = VARIABLE;
                         cur_exp->token->var = t;
                     }else {
-                        puts("[parse]: exception when judge_type");
+                        printf("[parse]: exception when judge_type\n");
                         return 0;
                     }
                     pre_exp = cur_exp;
@@ -163,7 +164,7 @@ pair * parse(char * exp) {
                         cur_exp->token->type = VARIABLE;
                         cur_exp->token->var = t;
                     }else {
-                        puts("[parse]: exception when judge_type");
+                        printf("[parse]: exception when judge_type\n");
                         return 0;
                     }
                     pre_exp = cur_exp;
@@ -190,7 +191,7 @@ pair * parse(char * exp) {
                         cur_exp->token->type = VARIABLE;
                         cur_exp->token->var = t;
                     }else {
-                        puts("[parse]: exception when judge_type");
+                        printf("[parse]: exception when judge_type\n");
                         return 0;
                     }
                     pre_exp = cur_exp;
@@ -208,11 +209,16 @@ pair * parse(char * exp) {
         i++;
     }
 
+    // 去除末尾空格
+    while (exp[i] == ' ') {
+        i++;
+    }
+
     // 退出时要么表达式已经闭合，要么遇到终止符
     // 理想的情况是，已闭合且遇到终止符
     // 表达式已经闭合且表达式字符串也终结的情况之外，定义为语法错误
-    if (l_parenthesis != 0 || (exp[i] != 0 && exp[i] != '\n')){
-        printf("[parse]: %s", SYNTAX_ERROR);
+    if (l_parenthesis != 0 || (exp[i] != 0 && exp[i] != '\n')) {
+        printf("[parse]: %s\n", SYNTAX_ERROR);
         return 0;
     }
 
